@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- DOCTYPE 지정 -->
+<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="photo">
+
+	<!-- PHOTO(갤러리) 등록 -->
+	<insert id="insertPhoto" parameterType="vo.PhotoVO">
+		INSERT INTO PHOTO(
+		PHOTO_CODE,
+		PHOTO_NUM,
+		PHOTO_TITLE,
+		PHOTO_DATE,
+		ADMIN_ID,
+		atch_file)
+		VALUES(
+		(SELECT SUBSTR(MAX(PHOTO_CODE),1,1) ||
+		TRIM((TO_CHAR(SUBSTR(MAX(PHOTO_CODE),2) + 1,'000'))) FROM PHOTO)
+		,PHOTO_SEQ.NEXTVAL
+		,#{photoTitle}
+		,SYSDATE
+		,#{adminId}
+		,#{atchFile}
+		)
+	</insert>
+
+	<!-- PHOTO(갤러리) 수정 -->
+	<update id="updatePhoto" parameterType="vo.PhotoVO">
+		UPDATE PHOTO
+		SET PHOTO_TITLE = #{photoTitle}
+		<if test='atchFile!=null'>
+			,ATCH_FILE = #{atchFile}
+		</if> 
+		WHERE PHOTO_CODE = #{photoCode}
+
+	</update>
+
+	<!-- PHOTO(갤러리) 삭제 -->
+	<delete id="deletePhoto" parameterType="String">
+		DELETE FROM PHOTO
+		WHERE PHOTO_CODE = #{photoCode}
+	</delete>
+
+	<!-- PHOTO(갤러리) 전체목록 조회 : 관리자화면 -->
+	<select id="selectAllPhoto" parameterType="hashMap" resultType="PhotoVO">
+	
+		SELECT A.* 
+		 FROM(
+			 SELECT ROWNUM AS RNUM,
+					B.* 
+			   FROM (
+					 SELECT * FROM photo
+					 where 1=1
+					 	<if test="sfl != null and sfl != ''"> 
+						   <choose>
+						      <when test="sfl.equalsIgnoreCase('wr_subject')">
+						           and PHOTO_TITLE like '%' || #{stx} || '%'
+						      </when> 
+						      <when test="sfl.equalsIgnoreCase('wr_host')">
+						           and ADMIN_ID like '%' || #{stx} || '%'
+						      </when>
+						     <otherwise>
+						           and (PHOTO_TITLE like '%' || #{stx} || '%' OR ADMIN_ID like '%' || #{stx} || '%')
+						   </otherwise>   
+						   </choose> 
+						</if>
+					 
+					 ORDER BY PHOTO_CODE DESC)B
+	<![CDATA[
+		   	   WHERE ROWNUM <= #{end})A 
+		 	where A.RNUM >= #{start} 
+	]]>
+	</select>
+	
+	<!-- 리뷰 갯수 카운트 -->
+	<select id="photoCountList" resultType="int">
+		select count(*)
+		from
+		PHOTO
+	</select>
+
+	<!-- PHOTO(갤러리) 세부 내용 조회 : 관리자화면 -->
+	<select id="selectDetailPhoto" resultType="vo.PhotoVO">
+		SELECT
+		A.PHOTO_CODE,
+		A.PHOTO_NUM,
+		A.PHOTO_TITLE,
+		A.PHOTO_DATE,
+		A.PHOTO_HITS,
+		A.ATCH_FILE,
+		B.ADMIN_ID,
+		B.ADMIN_NM
+		FROM PHOTO A, ADMIN B
+		WHERE PHOTO_CODE = #{photoCode}
+		AND A.ADMIN_ID = B.ADMIN_ID
+	</select>
+
+	<!-- PHOTO(갤러리) 검색목록 조회 : 관리자화면 -->
+	<select id="searchPhoto" resultType="vo.PhotoVO">
+		SELECT *
+		FROM PHOTO
+		WHERE 1=1
+ 	<if test="sfl != null and sfl != ''"> 
+	   <choose>
+	      <when test="sfl.equalsIgnoreCase('wr_subject')">
+	           and PHOTO_TITLE like '%' || #{stx} || '%'
+	      </when> 
+	      <when test="sfl.equalsIgnoreCase('wr_content')">
+	           and ADMIN_ID like '%' || #{stx} || '%'
+	      </when>
+	      <otherwise>
+	           and (PHOTO_TITLE like '%' || #{stx} || '%' OR ADMIN_ID like '%' || #{stx} || '%')
+	   </otherwise> 
+	   </choose> 
+	</if>
+	</select>
+	
+	<!-- PHOTO(갤러리) 검색목록 조회 : 사용자화면 -->
+	<select id="search" resultType="vo.PhotoVO">
+		SELECT *
+		FROM PHOTO
+		WHERE 1=1
+ 	<if test="sfl != null and sfl != ''"> 
+	   <choose>
+	      <when test="sfl.equalsIgnoreCase('wr_subject')">
+	           and PHOTO_TITLE like '%' || #{stx} || '%'
+	      </when> 
+	   </choose> 
+	</if>
+	</select>
+
+
+	<!-- PHOTO(갤러리) 사진코드여부 확인 -->
+	<select id="checkPhoto" parameterType="String" resultType="int">
+		SLELCT COUNT(*) as cnt
+		FORM PHOTO
+		WHERE PHOTO_CODE = #{photoCode}
+	</select>
+
+
+	<!-- PHOTO(갤러리) 조회수 증가 -->
+	<update id="updateHits" parameterType="vo.PhotoVO">
+		update photo
+		set photo_Hits = photo_Hits + 1
+		where PHOTO_CODE = #{photoCode}
+	</update>
+	
+	<!-- PHOTO(갤러리) 띄우기 -->
+	<select id="memberPhoto" resultType="vo.PhotoVO">
+		SELECT ATCH_FILE,
+			   PHOTO_TITLE,
+			   PHOTO_DATE,
+			   PHOTO_HITS
+		  FROM PHOTO
+		 WHERE PHOTO_CODE = #{photoCode}
+	</select>
+	
+	
+	
+	
+	<!-- 
+	
+	/////////////////////////////////////
+	
+	사용자  축제/상세  
+	
+	/////////////////////////////////////
+	-->
+	
+	
+	
+	<!-- PHOTO(갤러리)메인  -->
+	<select id="PhotoAll" parameterType="hashMap" resultType="vo.PhotoVO">
+		<!-- 메인에서 3개 내용만 뜨게 하기   -->
+		<![CDATA[
+		WITH T AS(
+		    SELECT ROW_NUMBER() OVER (ORDER BY PHOTO_CODE DESC) RNUM
+		         , PHOTO_CODE, PHOTO_NUM, PHOTO_TITLE, PHOTO_DATE, PHOTO_HITS, ADMIN_ID, ATCH_FILE
+		    FROM   PHOTO
+		)
+		SELECT * FROM T
+		WHERE T.RNUM <= 3
+		]]>
+	</select>
+	
+	
+	
+	
+	
+
+</mapper>

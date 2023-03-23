@@ -1,0 +1,51 @@
+    @charset "utf-8";
+
+
+    *{margin:0;padding:0;-webkit-appearance: none; box-sizing: border-box;}
+    html {overflow-x:hidden;background: #fff; font-size: 16px}
+    html,body{min-height:100vh;-webkit-text-size-adjust: none; -moz-text-size-adjust: none; -ms-text-size-adjust: none;}
+    body{display:inline-block;position:relative;width:100vw;}
+    ul,ol,li,a{box-sizing:border-box;}
+    a {display: inline-block;}
+    p {margin-bottom: 0;}
+    ol,ul{list-style:none}
+    dl, ol, ul{padding:0;margin:0;}
+    body,input,textarea,table{font-family:'NanumSquareRound'; font-size:16px; font-weight: 500; line-height: 1.5}
+    table{border-spacing: 0;border-collapse: collapse;}
+    img{display: inline-block;width:100%;float:left;}
+    a{color:#000;text-decoration:none;box-sizing: border-box;}
+    a:hover,a:active,a:focus{text-decoration:underline;color:#013668;}
+    /* a:focus{outline:1px solid #000;} */
+    span,strong{display: inline-block;}
+    address{font-style: normal}
+    p,li{font-size: 1rem;box-sizing: border-box;}
+    p{display: inline-block;width: 100%;}
+    select{-webkit-appearance: none;-moz-appearance: none;appearance: none;}
+    select::-ms-expand {display:none}
+    button,
+    input[type="button"]{font-family:'SpoqaHanSansNeo';cursor: pointer;}
+    *, ::after, ::before{box-sizing: border-box;}
+    ::after, ::before{display: inline-block;position: absolute;}
+	i {font-style: normal;}
+	input:focus, select:focus, option:focus, textarea:focus, button:focus{
+		outline: none;
+	}
+
+
+    .mb10{margin-bottom:10px;}
+    .mb20{margin-bottom:20px;}
+    .mb30{margin-bottom:30px;}
+    .mb40{margin-bottom:40px;}
+    .mb50{margin-bottom:50px;}
+    .mb60{margin-bottom:60px;}
+    .mb70{margin-bottom:70px;}
+    .mb80{margin-bottom:80px;}
+    .mb90{margin-bottom:9in;}
+
+
+	.flex {display: flex !important; align-items: center;}
+	.flex .dash {margin:  0 15px; }
+    
+   /*div, span, li, p, a, form, button, img { -webkit-transition: all 0.3s ease 0s;-moz-transition: all 0.3s ease 0s;-ms-transition: all 0.3s ease 0s;-o-transition: all 0.3s ease 0s;transition: all 0.3s ease 0s;}*/
+	caption, legend { overflow: hidden;width: 0; height: 0; font-size: 0;line-height: 0;    padding-top: 0;padding-bottom: 0;}
+   

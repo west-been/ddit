@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="review">
+
+	<!-- 리뷰등록 -->
+	<insert id="reviewWrite" parameterType="ReviewVO">
+		insert into review
+		(
+		REV_CODE,
+		REV_TITLE,
+		REV_CONTENT,
+		REV_DATE,
+		MEM_ID,
+		<if test='atchFile!=null'>
+			ATCH_FILE,
+		</if>
+		TOUR_CODE,
+		score
+		)
+		values
+		(
+		review_seq.nextval,
+		#{revTitle},
+		#{revContent},
+		sysdate,
+		#{memId},
+		<if test='atchFile!=null'>
+			#{atchFile},
+		</if>
+		(select tour_code
+		from tour
+		where tour_nm = #{tourNm})
+		,
+		#{score}
+		)
+	</insert>
+
+	<!-- 리뷰 갯수 카운트 -->
+	<select id="reviewCountList" resultType="int">
+		select count(*)
+		from
+		review
+	</select>
+
+	<!-- 리뷰리스트 출력 -->
+	<select id="reviewList" parameterType="hashMap"
+		resultType="ReviewVO">
+		SELECT a.REV_CODE,
+		a.REV_TITLE,
+		a.REV_CONTENT,
+		a.REV_DATE,
+		a.REV_LIKE,
+		a.MEM_ID,
+		a.ATCH_FILE,
+		a.rev_hits,
+		b.tour_nm
+		FROM(SELECT ROWNUM AS
+		RNUM,c.* FROM (
+		SELECT * FROM review
+		where 1=1
+		<if test="sfl != null and sfl != ''">
+			<choose>
+				<when test="sfl.equalsIgnoreCase('wr_subject')">
+					and rev_title like '%' || #{stx} || '%'
+				</when>
+				<when test="sfl.equalsIgnoreCase('wr_content')">
+					and rev_content like '%' || #{stx} || '%'
+				</when>
+				<otherwise>
+					and (rev_title like '%' || #{stx} || '%' OR rev_content like '%' ||
+					#{stx} || '%')
+				</otherwise>
+			</choose>
+		</if>
+		order by rev_code DESC)c
+	<![CDATA[
+		    WHERE ROWNUM <= #{end})a
+	, tour b
+WHERE A.RNUM >= #{start}
+     and a.tour_code = b.tour_code
+	]]>
+	</select>
+<!--      order by a.rev_code desc -->
+
+	<!-- 리뷰 상세조회 -->
+	<select id="reviewDetail" resultType="vo.ReviewVO">
+		select
+		a.REV_CODE,
+		a.REV_TITLE,
+		a.REV_CONTENT,
+		a.REV_DATE,
+		a.REV_LIKE,
+		a.MEM_ID,
+		a.ATCH_FILE,
+		b.tour_nm,
+		a.rev_hits,
+		a.score
+		from review a, tour b
+		where a.tour_code =
+		b.tour_code
+		and rev_code = #{revCode}
+	</select>
+
+	<!-- 조회수 올리기 -->
+	<update id="updateHits" parameterType="vo.ReviewVO">
+		update review
+		set rev_hits
+		= rev_hits + 1
+		where rev_code = #{revCode}
+	</update>
+
+	<!-- 리뷰수정 -->
+	<update id="updateReview" parameterType="vo.ReviewVO">
+		update review
+		set
+		REV_TITLE=#{revTitle},
+		REV_CONTENT=#{revContent},
+		score=#{score}
+		<if test='atchFile!=null'>
+			,ATCH_FILE =#{atchFile}
+		</if>
+		where rev_code = #{revCode}
+	</update>
+
+	<!-- 리뷰삭제 -->
+	<delete id="deleteReview" parameterType="String">
+		delete review
+		where
+		rev_code=#{revCode}
+	</delete>
+
+	<!-- 조회수 올리기 -->
+	<update id="reviewUpdateHits" parameterType="vo.ReviewVO">
+		update review
+		set
+		rev_hits = rev_hits + 1
+		where rev_code = #{revCode}
+	</update>
+
+	<!-- 관광지별 리뷰 -->
+	<select id="tourReview" parameterType="String"
+		resultType="vo.ReviewVO">
+		select
+		rev_code,
+		REV_TITLE ,
+		MEM_ID ,
+		REV_DATE,
+		REV_HITS,
+		score
+		from review
+		where
+		tour_code = #{tourCode}
+	</select>
+
+	<!-- 관광지별 평점 -->
+	<select id="scoreAvg" parameterType="String"
+		resultType="vo.ReviewVO">
+		select round(sum(score)/count(tour_code),1) as scoreAvg
+		from review
+		where tour_code = #{tourCode}
+	</select>
+
+</mapper>

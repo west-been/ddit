@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- DOCTYPE 지정 -->
+<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="event">
+
+	<!-- EVENT(축제) 등록 -->
+	<insert id="inserEvent" parameterType="vo.EventVO">
+		INSERT INTO EVENT(
+		EVENT_CODE,
+		EVENT_NM,
+		EVENT_LOCATION,
+		EVENT_PERIOD,
+		EVENT_HOST,
+		EVENT_TEL,
+		ADMIN_ID,
+		ATCH_FILE)
+		VALUES(
+		(SELECT TRIM((TO_CHAR(SUBSTR(MAX(EVENT_CODE),2) + 1,'000'))) FROM EVENT)
+		,#{eventNm}
+		,#{eventLocation}
+		,#{evertPeriod}
+		,#{eventHost}
+		,#{eventTel}
+		,#{adminId}
+		,#{atchFile}
+		)
+	</insert>
+
+	<!-- EVENT(축제) 수정 -->
+	<update id="updateEvent" parameterType="vo.EventVO">
+		UPDATE EVENT
+		SET EVENT_NM = #{eventNm},
+		EVENT_LOCATION = #{eventLocation},
+		EVENT_PERIOD = #{evertPeriod},
+		EVENT_HOST = #{eventHost},
+		EVENT_TEL = #{eventTel}
+		<if test='atchFile!=null'>
+			,ATCH_FILE = #{atchFile}
+		</if>
+		WHERE EVENT_CODE = #{eventCode}
+	</update>
+
+	<!-- EVENT(축제) 삭제 -->
+	<delete id="deleteEvent" parameterType="String">
+		DELETE EVENT
+		WHERE EVENT_CODE = #{eventCode}
+	</delete>
+
+	<!-- EVENT(축제) 전체목록 조회 : 관리자화면 -->
+	<select id="selectAllEvent" parameterType="hashMap" resultType="vo.EventVO">
+		SELECT A.* 
+		 FROM(
+			 SELECT ROWNUM AS RNUM,
+					B.* 
+			   FROM (
+					 SELECT * FROM event
+					 where 1=1
+					 	<if test="sfl != null and sfl != ''"> 
+						   <choose>
+						      <when test="sfl.equalsIgnoreCase('wr_subject')">
+						           and EVENT_NM like '%' || #{stx} || '%'
+						      </when> 
+						       <when test="sfl.equalsIgnoreCase('wr_host')">
+						           and EVENT_LOCATION like '%' || #{stx} || '%'
+						      </when>
+						      <otherwise>
+						           and (EVENT_LOCATION like '%' || #{stx} || '%' OR EVENT_NM like '%' || #{stx} || '%')
+						   </otherwise> 
+						   </choose> 
+						</if>
+					 order by event_code desc
+					<!--  ORDER BY ROWNUM DESC -->)B
+	<![CDATA[
+		   	   WHERE ROWNUM <= #{end})A 
+		 	where A.RNUM >= #{start} 
+		 	
+	]]>
+	</select>
+
+	<!-- EVENT(축제) 검색목록 조회 : 관리자화면 -->
+
+<select id="searchEvent" resultType="vo.EventVO">
+		SELECT *
+		FROM EVENT
+		WHERE 1=1
+ 	<if test="sfl != null and sfl != ''"> 
+	   <choose>
+	      <when test="sfl.equalsIgnoreCase('wr_subject')">
+	           and EVENT_NM like '%' || #{stx} || '%'
+	      </when> 
+	      <when test="sfl.equalsIgnoreCase('wr_content')">
+	           and EVENT_LOCATION like '%' || #{stx} || '%'
+	      </when>
+	      <otherwise>
+	           and (EVENT_LOCATION like '%' || #{stx} || '%' OR EVENT_NM like '%' || #{stx} || '%')
+	   </otherwise> 
+	   </choose> 
+	</if>
+	</select>
+
+
+
+	<!-- EVENT(축제) 사진코드여부 확인 -->
+	<select id="checkEvent" parameterType="String" resultType="int">
+		SLELCT COUNT(*) as cnt
+		FORM EVENT
+		WHERE EVENT_CODE = #{eventCode}
+	</select>
+
+
+	<!-- EVENT(축제) 조회수 증가 -->
+	<update id="updateHits" parameterType="vo.EventVO">
+		update event
+		set event_Hits
+		= event_Hits + 1
+		where EVENT_CODE = #{eventCode}
+	</update>
+	
+		<!-- EVENT(축제) 세부 내용 조회 : 관리자화면 -->
+	<select id="selectDetailEvent" resultType="vo.EventVO" parameterType="string">
+		SELECT *
+		FROM EVENT
+		WHERE EVENT_CODE = #{eventCode}
+	</select>
+
+	<!-- 
+	
+	/////////////////////////////////////
+	
+	사용자  축제/상세  
+	
+	/////////////////////////////////////
+	-->
+	
+	
+	
+	<!-- EVENT(축제) 세부조회 : 사용자 화면, 관리자와 같이 사용할 예정  -->
+	<select id="selectEvent" parameterType="String" resultType="vo.EventVO">
+		SELECT *
+		FROM EVENT
+		where EVENT_CODE = #{eventCode}
+	</select>
+	
+	
+	<!-- EVENT(축제)) 페이징  -->
+	<select id="eventCountList" resultType="int" parameterType="map">
+		select COUNT(*) 
+		FROM EVENT
+	</select>
+	
+	
+	<!-- EVENT 메인  -->
+	<select id="EventAll" parameterType="hashMap" resultType="vo.EventVO">
+		SELECT *
+		FROM EVENT
+	</select>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+</mapper>

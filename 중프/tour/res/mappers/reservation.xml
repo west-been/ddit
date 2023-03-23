@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="reservation">
+
+	<!-- 마이페이지에서 해당 회원의 예약내역을 확인하기 위한 메서드  --> 
+ <select id="selectMypageReserv" parameterType="String" resultType="vo.ReservationVO">
+	SELECT A.RES_CODE, A.RES_DATE, A.RES_PRICE, A.RES_QTY, A.RES_STATUS, A.ADMIN_ID, A.MEM_ID, A.TOUR_CODE, A.VISIT_DATE, A.USE_MILEAGE,
+           B.TOUR_NM, B.TOUR_LOCATION, B.TOUR_REGION, B.TOUR_TEL, B.TOUR_SEASON, B.TOUR_CATEGORY, B.TOUR_INFO, B.TOUR_PRICE, B.TOUR_CAPACITY, B.START_TIME, B.END_TIME, B.START_DATE, B.END_DATE, B.ATCH_FILE, B.LATLNG1, B.LATLNG2
+      FROM RESERVATION A,
+           TOUR B
+     WHERE A.TOUR_CODE = B.TOUR_CODE
+       AND MEM_ID=#{memId}
+	</select>
+	
+	<!-- 예약코드와 회원아이디를 통해 예약코드를 조회(select) -->
+ <select id="selectResCodeMemIdAndTourCode" parameterType="ReservationVO" resultType="String">
+ 	SELECT RES_CODE
+      FROM RESERVATION
+     WHERE TOUR_CODE= #{tourCode}
+      AND MEM_ID= #{memId}
+ </select>
+ 	
+ <select id="selectReserv" parameterType="String" resultType="ReservationVO">
+ 	select RES_CODE, 
+ 	       RES_DATE, 
+ 	       RES_PRICE, 
+ 	       RES_QTY, 
+ 	       RES_STATUS, 
+ 	       ADMIN_ID, 
+ 	       MEM_ID, 
+ 	       TOUR_CODE, 
+ 	       VISIT_DATE,
+ 	       USE_MILEAGE
+	  from RESERVATION
+     where RES_CODE = #{resCode}
+ 
+ </select>
+ 
+ <select id="countReserv" parameterType="ReservationVO" resultType="int">
+ 	select count(*) as cnt
+	  from RESERVATION
+     where TOUR_CODE = #{tourCode}
+       and MEM_ID =#{memId}
+ 
+ </select>
+	
+<insert id="insertreservation" parameterType = "ReservationVO">
+	
+		insert into reservation
+		(
+		res_code,
+		res_date,
+		res_price,
+		res_qty,
+		res_status,
+		admin_id,
+		mem_id,
+		tour_code,
+		visit_date,
+		USE_MILEAGE
+		)
+		values
+		(
+		reservation_seq.nextval,
+		SYSDATE,
+		#{resPrice},
+		#{resQty},
+		'결제대기',
+		NULL,
+		#{memId},
+		#{tourCode},
+		null,
+		#{useMileage}
+		)
+		
+	</insert> 
+<!-- 예약 완료시 예약가능인원을 1씩 감소 -->	
+	<update id="updateTourCapacity" parameterType="TourVO">
+	
+		update tour
+		   set TOUR_CAPACITY=TOUR_CAPACITY-1
+		 where TOUR_CODE=#{tourCode}
+	
+	</update>
+<!-- 예약 취소시 예약가능인원을 1씩 증가 -->	
+	<update id="updateCancelTourCapacity" parameterType="String">
+	
+		UPDATE TOUR
+           SET TOUR_CAPACITY = TOUR_CAPACITY+1
+         WHERE TOUR_CODE IN (SELECT B.TOUR_CODE
+                               FROM TOUR A,
+                                    RESERVATION B
+                              WHERE B.RES_CODE = #{resCode}
+                                AND A.TOUR_CODE = B.TOUR_CODE)
+	
+	</update>
+   
+<!--  결제 완료시 상태를 결제완료로 업데이트한다  -->
+	 <update id="updateReservState" parameterType="vo.ReservationVO">
+	 
+	 update reservation
+	 	set RES_STATUS = #{resStatus}
+	  where res_code = #{resCode}
+	 
+	 </update>
+	 
+	 <update id="updateMileage" parameterType="ReservationVO">
+	 
+	 	UPDATE MEMBER
+           SET MEM_MILEAGE = MEM_MILEAGE- #{useMileage}
+         WHERE MEM_ID IN (SELECT B.MEM_ID
+                            FROM MEMBER A,
+                                 RESERVATION B
+                           WHERE B.MEM_ID = #{memId}
+                             AND A.MEM_ID = B.MEM_ID)
+	 </update>
+	 
+	 <!-- 예약취소시 마일리지 환불 -->
+	 <update id="returnMileage" parameterType="ReservationVO">
+	 
+	 	UPDATE MEMBER
+           SET MEM_MILEAGE = MEM_MILEAGE+ #{useMileage}
+         WHERE MEM_ID IN (SELECT B.MEM_ID
+                            FROM MEMBER A,
+                                 RESERVATION B
+                           WHERE B.MEM_ID = #{memId}
+                             AND A.MEM_ID = B.MEM_ID)
+	 
+	 </update>
+	 
+	 <!-- 결제시 결제상태 변경 -->
+	 <update id="updateResStatus" parameterType="ReservationVO">
+	 
+	 	UPDATE RESERVATION
+           SET RES_STATUS = #{resStatus}
+         WHERE RES_CODE = #{resCode}
+	 
+	 </update>
+	 
+	 <update id="refundMileage" parameterType="hashMap">
+	 
+	 	UPDATE MEMBER
+   		   SET MEM_MILEAGE = MEM_MILEAGE + #{refundMileage}
+         WHERE MEM_ID = #{memId}
+	 
+	 </update>
+   
+	<delete id ="deleteReserv" parameterType="String">
+	
+		delete from RESERVATION where RES_CODE = #{resCode}
+	
+	</delete>
+
+   
+</mapper>

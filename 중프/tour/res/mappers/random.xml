@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="randomtour">
+	
+	<select id="randomtourList" parameterType="hashMap" resultType="TourVO">
+	
+		
+					 SELECT * FROM tour
+					 where 1=1
+					 	<if test="stx != null and stx != ''">
+					 		and TOUR_NM like '%' || #{stx} || '%'
+					 	</if>
+					 	<if test="sfl != null and sfl != ''"> 
+						   <choose>
+						      <when test="sfl.equalsIgnoreCase('wr_subject')">
+						           and TOUR_NM like '%' || #{stx} || '%'
+						      </when> 
+						      <when test="sfl.equalsIgnoreCase('wr_content')">
+						           and TOUR_INFO like '%' || #{stx} || '%'
+						      </when>
+						      <when test="sfl.equalsIgnoreCase('wr_location')">
+						           and TOUR_LOCATION like '%' || #{stx} || '%'
+						      </when>
+						   </choose> 
+						</if>
+					 
+	</select>
+
+	<select id="randomPickList" parameterType="hashMap" resultType="TourVO">
+		
+		Select * 
+		  from( 
+    			select * from tour
+    			order by DBMS_RANDOM.RANDOM )
+    <![CDATA[			
+         where rownum <= #{ranCnt}
+    ]]>
+	</select>
+</mapper>

@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- DOCTYPE 지정 -->
+<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="member">
+
+<!-- 쿼리 이름이 중복될 수 있을 때 방지하는 것 = namespace 필수임~! -->
+<!-- 이 영역에 SQL문에 맞는 태그를 사용하여 SQL문을 기술한다.
+   
+   사용할 수 있는 기본적인 태그들
+   
+   <select> ~~~ </select>
+   <insert> ~~~ </insert>
+   <update> ~~~ </update>
+   <delete> ~~~ </delete>
+   
+   위 태그에서 사용되는 속성들
+   
+   1) id속성 : 해당 태그를 호출할 때 <mapper> 태그의 namespace와 연결하여 사용하는 이름.
+   
+   2) parameterType 속성 : SQL문에 사용될 데이터가 들어있는 객체타입 지정
+                         (보통 VO클래스, 자바의 자료형이름 등이 사용됨.)
+                         (TypeAlias로 지정한 alias명을 사용할 수 있다.)
+                         
+   3) resultType 속성 : select문을 실행한 결과를 담을 객체타입을 지정한다.
+                      (보통 VO클래스, 자바의 자료형이름 등이 사용됨.)
+             
+   4) resultMap 속성 : 결과 레코드 컬럼명과 VO객체의 property명이 다를 경우에 적절한 매핑을 위해 사용한다.
+   
+ -->
+<!--     회원가입 insert -->
+    <insert id="joinMember" parameterType="vo.MemberVO">  
+    INSERT INTO MEMBER (
+	MEM_ID,MEM_NM, MEM_REGNO1,MEM_REGNO2, MEM_PW, MEM_TEL, MEM_ADDR,MEM_ADDR2,MEM_EMAIL,ATCH_FILE, MEM_MILEAGE
+	)
+	VALUES (#{memId}, #{memNm}, #{memRegno1},#{memRegno2},
+			#{memPw},#{memTel},#{memAddr},#{memAddr2},#{memEmail}, #{atchFile}, 3000)
+   </insert>
+   
+   
+   <!-- 기존 비밀번호와 같은지 다른지 체킹 -->
+   <select id="mypagePwCheck" parameterType="vo.MemberVO" resultType="int">
+   	 	SELECT COUNT(*)
+		FROM   MEMBER
+		WHERE  MEM_ID = #{memId} AND MEM_PW = #{memPw}
+   </select>
+   
+   <!-- 회원정보 수정 update -->
+   <update id="updateMember" parameterType="vo.MemberVO"> 
+            
+    update member 
+    set     
+		MEM_NM = #{memNm},
+		MEM_TEL = #{memTel},
+		<if test="memPw!='' and memPw!=null">
+			MEM_PW = #{memPw},
+		</if>
+		MEM_EMAIL = #{memEmail},
+		MEM_ADDR = #{memAddr},
+		MEM_ADDR2 = #{memAddr2}
+		<if test='atchFile!=null'>
+		,ATCH_FILE = #{atchFile}
+ 		</if>
+	WHERE MEM_ID = #{memId}
+
+   </update> 
+   
+   
+   <!-- 회원정보 수정 패스워드 -->
+   <update id="updateMemberPw" parameterType="vo.MemberVO"> 
+            
+    update member 
+    set     
+		MEM_PW = #{memPw}
+		<if test='atchFile!=null'>
+		,ATCH_FILE = #{atchFile}
+ 		</if>
+	where mem_id = #{memId}
+
+   </update> 
+   
+   
+   
+   
+   
+   
+   
+   <!-- 회원정보 삭제 -->
+    <delete id="deleteMember" parameterType="String">
+      delete from member where mem_id = #{memId}
+    </delete> 
+   
+   
+	<!-- 회원정보 전체 조회 -->
+    <select id="selectAllMember" resultType="vo.MemberVO">
+      select *
+        from member
+   </select>
+
+	<!-- 아이디 중복 체크 -->
+   <select id="idCheck" parameterType="string" resultType="int">
+   	  SELECT COUNT(*)
+   	  	FROM MEMBER
+	  WHERE MEM_ID = #{memId}
+   </select>
+   
+
+   <!-- 회원 로그인 -->
+   <select id="loginMember" parameterType="vo.MemberVO" resultType="vo.MemberVO">
+   	SELECT MEM_ID, MEM_NM, MEM_REGNO1, MEM_REGNO2, MEM_PW, MEM_TEL, MEM_ADDR, MEM_EMAIL, MEM_STATUS, MEM_MILEAGE,
+   	ATCH_FILE
+	FROM   MEMBER
+	WHERE  MEM_ID = #{memId} AND MEM_PW = #{memPw}
+   </select>
+   
+   <!-- 관리자 로그인 -->
+   <select id="adminlogin" parameterType="vo.AdminVO" resultType="vo.AdminVO">
+   	SELECT ADMIN_ID, ADMIN_NM, ADMIN_PW, ADMIN_TEL, ADMIN_EMAIL, ADMIN_ADDR, ATCH_FILE
+	FROM   ADMIN
+	WHERE  ADMIN_ID = #{adminId} AND ADMIN_PW = #{adminPw}
+   </select>
+   
+<!-- 아이디 찾기 -->
+   <select id="findId" parameterType="MemberVO" resultType="String">
+   	 SELECT MEM_ID
+	 from member
+     where mem_nm = #{memNm}
+	 and mem_Tel = #{memTel}
+   
+	<!--  비밀번호 찾기 -->
+   </select>
+	<select id="findPw" parameterType="MemberVO" resultType="MemberVO">
+   	 SELECT *
+	 from member
+     where mem_ID = #{memId}
+	 and mem_NM = #{memNm}
+	 and mem_Tel = #{memTel}
+	 </select>
+	
+	<!-- 	비밀번호 재설정-->
+	<update id = "findPwRe" parameterType="MemberVO" >
+	update member
+	set mem_pw = #{memPw}
+	where mem_id = #{memId}
+	and mem_nm = #{memNm}
+	</update>
+	
+	
+	
+	<!-- 
+	/////////////////////////////
+			마이페이지 
+	/////////////////////////////
+	 -->
+	 
+	 
+	<!-- 마이페이지 관리자 정보 수정 update -->
+   <update id="updateAdmin" parameterType="vo.AdminVO"> 
+          
+    update ADMIN 
+    set     
+		ADMIN_ID = #{adminId},
+		ADMIN_NM = #{adminNm},
+		ADMIN_PW = #{adminPw},
+		ADMIN_TEL = #{adminTel},
+		ADMIN_EMAIL= #{adminEmail},
+		ADMIN_ADDR = #{adminAddr},
+		ADMIN_ADDR2= #{adminAdd2}
+		<if test='atchFile!=null'>
+		,ATCH_FILE = #{atchFile}
+ 		</if>
+		where ADMIN_ID = #{adminId}
+   </update> 
+	 
+	 
+	 
+
+	<!--  마이페이지 회원정보 아이디로 검색   -->
+   <select id="selectMember" parameterType="String" resultType="vo.MemberVO">
+      select MEM_ID,
+			MEM_NM,
+			MEM_REGNO1,
+			MEM_REGNO2,
+			MEM_PW,
+			MEM_TEL,
+			MEM_ADDR,
+			MEM_ADDR2,
+			MEM_EMAIL,
+			MEM_MILEAGE,
+			ATCH_FILE
+        from member
+        where MEM_ID = #{memId}
+   </select> 
+   
+   <!-- 마이페이지 관리자 로그인 -->
+   <select id="mypageAdminlogin" parameterType="vo.AdminVO" resultType="vo.AdminVO">
+   	SELECT ADMIN_ID, ADMIN_NM, ADMIN_PW, ADMIN_TEL, ADMIN_EMAIL, ADMIN_ADDR, ADMIN_ADDR2 as ADMIN_ADD2, ATCH_FILE
+	FROM   ADMIN
+	WHERE  ADMIN_ID = #{adminId}
+   </select>
+   
+   
+	<!-- 마이페이지에서 관리자로 로그인했을 때 "문의내역" 전체를 확인하기 위한 메서드 : 5개 내용만 뜨게 하기  -->
+	<select id="adminSelectMypageQna" parameterType="String" resultType="vo.AdminVO">
+
+		<![CDATA[
+		WITH T AS(
+		    SELECT ROW_NUMBER() OVER (ORDER BY QNA_CODE DESC) RNUM
+		         , QNA_TITLE, QNA_CODE, QNA_DATE, QNA_STATUS, REPLY_DATE, mem_id, ADMIN_ID
+		    FROM   QNA
+		)
+		SELECT * FROM T
+		WHERE T.RNUM <= 5
+	
+		]]> 
+	</select>	
+	
+	<!-- 마이페이지에서 관리자로 로그인했을 때 "예약내역" 전체를 확인하기 위한 메서드 -->
+	<select id="adminSelectMypageReserv" parameterType="String" resultType="vo.AdminVO">
+      
+select a.res_code,
+      	   b.tour_nm, 
+      	   a.res_date,
+      	   a.visit_date,
+           a.res_status,
+           a.mem_id,
+           c.admin_id,
+           a.tour_code
+  	  from Reservation a, tour b, ADMIN c
+ 	 where a.tour_code =b.tour_code
+       and c.ADMIN_ID = #{adminId}
+
+     
+       
+	</select>	
+
+
+</mapper>

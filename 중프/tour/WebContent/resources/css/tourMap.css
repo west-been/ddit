@@ -1,0 +1,80 @@
+@charset "utf-8";
+
+.tourWther {    right: 50px !important;}
+.topBtn,.travMap {display: none; }
+
+
+
+
+
+ /* ==============
+  * 대전버스노선
+  *
+  *
+ =================*/
+.bus_wrap .bus_left  {float: left;width: 262px;}
+.bus_wrap .bus_left .scroll {height: 639px;overflow-y: auto;}
+     
+.bus_wrap .bus_info { background: #6b6f79;padding: 27px 17px;}
+.bus_wrap .bus_info .tit {font-size: 20px;  margin: 0;margin-bottom: 17px; color: #fff; }
+.bus_wrap .bus_info .bus_search .txt{color: #f1f1f1; margin-top: 10px; font-size: 13px;}
+.bus_wrap .bus_info .input_group {position: relative;}
+.bus_wrap .bus_info .input_group input {width: 100%;}
+.bus_wrap .bus_info .input_group .ico {position: absolute; right:0;  width: 19px; height: 34px; background: url(../images/tourMap/srch.png) no-repeat center}
+
+
+
+.btn_st01{background:#0093d0; width:113px; height:32px; display:block; float:left; margin-bottom:5px;}
+.btn_st02{background:#f8931d; width:113px; height:32px; display:block; float:left; margin-bottom:5px;}
+
+.btn_st01 a, 
+.btn_st02 a{text-align:center; display:block; line-height:32px; color:#fff; font-weight:600;}
+
+/* 04.24 빠른길찾기 수정 */
+.data01{width: 158px;height: 62px;/* padding: 9px 0 0 15px; */float: left;}
+.data01 > li{margin-bottom:5px;}
+
+.data03{width: 70px;height: 62px;padding: 9px 0 0 15px;float: left;}
+.data03 > li{margin-bottom:5px;}
+.txt_01{color:#b70000; font-weight:600;}
+.txt_02{color:#23406d; font-weight:600;}
+.txt_03{color:#121212; font-weight:600;}
+.txt_04{color:#4d4d4d; font-size:12px;}
+.path_data{width:100%; height:100px; border-bottom:#a7a7a7 solid 1px; margin-top:5px;}
+.bus_icon01{width:45px; height:25px; float:left;}
+.intro_wrap > ul > li{height:20px; text-indent:4px;}
+/* 노선검색 */
+.radio_area{width:100%; height:20px; margin-top:7px;}
+.bus_kind{width:50px; height:26px;}
+.bus_num{width:50px;height:35px;line-height: 38px;text-align:center;font-size: 16px;font-weight:900;/* letter-spacing: -0.09em; */}
+.bus_num02{width:100%; height:60px; line-height:60px; padding-top:10px; text-align:center;}
+.bus_num03{line-height:21px;font-size:14px;padding: 9px 0 0 10px;}
+
+.list_detail{float:left;width: 58px;border-right:#ccc solid 1px;}
+.list_detail li{height:26px; text-align: center;}
+.bus_sta{width:168px; height:60px; float:right; line-height:60px; text-indent:3px;}
+.bus_sta > ul > li{height:30px;  line-height:30px; text-overflow:ellipsis;white-space:nowrap;word-wrap:normal}
+.bus_sta > ul > li:first-child{border-bottom:#ccc solid 1px;}
+.bus_sta > ul > li a {font-size: 13px;}
+
+.list_data01{width:100%; height:50px;}
+.list_data01 > li{width:100%; height:62px; border-bottom:#a7a7a7 solid 1px; cursor:pointer;}
+.list_data01 > div{cursor:pointer;}
+.tb_st01{width:100%; height:40px; background:#deecfa; border-top:#425663 solid 1px;}
+
+
+#map{ width: auto !important;}
+.bus_map {position: relative; height: calc(100vh - 145px); top: 0; left: 0; margin-left: 261px; background: #ddd; }
+
+
+
+
+
+
+
+
+
+
+
+
+

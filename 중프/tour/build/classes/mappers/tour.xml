@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="tour">
+
+	<select id="selectTour" parameterType="String" resultType="TourVO">
+
+		select tour_code,
+			TOUR_CODE,
+			TOUR_NM,
+			TOUR_LOCATION,
+			TOUR_REGION,
+			TOUR_TEL,
+			TOUR_SEASON,
+			TOUR_CATEGORY,
+			TOUR_INFO,
+			TOUR_PRICE,
+			ADMIN_ID,
+			TOUR_CAPACITY,
+			START_TIME,
+			END_TIME,
+			START_DATE,
+			END_DATE,
+			ATCH_FILE
+		from tour
+		where tour_code = #{tourCode}
+
+	</select>
+
+	<select id="countList" resultType="int">
+		select count(*) from tour
+	</select>
+
+	<select id="tourList" parameterType="hashMap" resultType="TourVO">
+	
+		SELECT A.* 
+		 FROM(
+			 SELECT ROWNUM AS RNUM,
+					B.* 
+			   FROM (
+					 SELECT * FROM tour
+					 where 1=1
+					 	<if test="sfl != null and sfl != '' and stx!= null and stx!=''"> 
+						   <choose>
+						      <when test="sfl.equalsIgnoreCase('wr_subject')">
+						           and TOUR_NM like '%' || #{stx} || '%'
+						      </when> 
+						      <when test="sfl.equalsIgnoreCase('wr_content')">
+						           and TOUR_INFO like '%' || #{stx} || '%'
+						      </when>
+						      <when test="sfl.equalsIgnoreCase('wr_location')">
+						           and TOUR_LOCATION like '%' || #{stx} || '%'
+						      </when>
+						   </choose> 
+						</if>
+					 <choose>
+					 	<when test="arraySort == null || arraySort.equalsIgnoreCase('as_basic') ">
+					 		ORDER BY TOUR_CODE DESC)B
+					 	</when>
+						<when test="arraySort.equalsIgnoreCase('as_subjectAsc')">
+							ORDER BY TOUR_NM )B
+						</when>					 
+						<when test="arraySort.equalsIgnoreCase('as_subjectDesc')">
+							ORDER BY TOUR_NM DESC)B
+						</when>					 
+						<when test="arraySort.equalsIgnoreCase('as_priceAsc')">
+							ORDER BY TOUR_PRICE)B
+						</when>					 
+						<when test="arraySort.equalsIgnoreCase('as_priceDesc')">
+							ORDER BY TOUR_PRICE DESC)B
+						</when>					 
+						<when test="arraySort.equalsIgnoreCase('as_capacityAsc')">
+							ORDER BY TOUR_CAPACITY)B
+						</when>					 
+						<when test="arraySort.equalsIgnoreCase('as_capacityDesc')">
+							ORDER BY TOUR_CAPACITY DESC)B
+						</when>					 
+					 </choose>
+	<![CDATA[
+		   	   WHERE ROWNUM <= #{end})A 
+		 	where A.RNUM >= #{start} 
+	]]>
+	</select>
+
+	<insert id="insertSpot" parameterType="vo.TourVO">
+		insert into tour
+		(
+		TOUR_CODE,
+		TOUR_NM,
+		TOUR_LOCATION,
+		TOUR_REGION,
+		TOUR_TEL,
+		TOUR_SEASON,
+		TOUR_CATEGORY,
+		TOUR_INFO,
+		TOUR_PRICE,
+		ADMIN_ID,
+		TOUR_CAPACITY,
+		START_TIME,
+		END_TIME,
+		START_DATE,
+		END_DATE,
+		ATCH_FILE
+		)
+		values
+		(
+		(SELECT SUBSTR(MAX(tour_CODE),1,1) || TRIM((TO_CHAR(SUBSTR(MAX(tour_CODE),2) + 1,'00000'))) FROM tour),
+		#{tourNm},
+		#{tourLocation},
+		#{tourRegion},
+		#{tourTel},
+		#{tourSeason},
+		#{tourCategory},
+		#{tourInfo},
+		#{tourPrice},
+		#{adminId},
+		#{tourCapacity},
+		#{startTime},
+		#{endTime},
+		#{startDate},
+		#{endDate},
+		#{atchFile}
+		)
+	</insert>
+
+	<update id="checkTourEndDate" parameterType="TourVO">
+	
+		UPDATE TOUR
+           SET TOUR_CAPACITY = 0
+         WHERE TOUR_CODE = #{tourCode}
+		
+	</update>
+</mapper>
